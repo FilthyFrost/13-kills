@@ -1,0 +1,24 @@
+{
+  "name": "13-kills",
+  "version": "0.1.0",
+  "description": "13点卡牌对战 MVP - 规则层与UI层分离",
+  "main": "dist/ui/cli.js",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/ui/cli.js",
+    "start:auto": "node dist/ui/cli.js --auto",
+    "dev": "vite",
+    "build:web": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["card-game", "13-point", "mvp"],
+  "license": "MIT"
+}
