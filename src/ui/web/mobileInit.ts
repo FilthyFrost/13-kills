@@ -1,5 +1,5 @@
 /**
- * 移动端初始化：全屏、横屏锁定、竖屏提示、防滑动
+ * 移动端初始化：竖屏提示、防滑动
  */
 
 function isMobile(): boolean {
@@ -21,66 +21,13 @@ function updatePortraitOverlay(): void {
 
   if (isPortrait() && isMobile()) {
     overlay.classList.add('visible');
+    overlay.style.visibility = 'visible';
+    overlay.style.pointerEvents = 'auto';
   } else {
     overlay.classList.remove('visible');
+    overlay.style.visibility = 'hidden';
+    overlay.style.pointerEvents = 'none';
   }
-}
-
-function initMobileTapOverlay(): void {
-  const tapOverlay = document.getElementById('mobile-tap-overlay');
-  const gameContainer = document.getElementById('game-container');
-  if (!tapOverlay || !gameContainer) return;
-
-  if (!isMobile()) {
-    return;
-  }
-
-  tapOverlay.classList.add('visible');
-
-  const startGame = async (): Promise<void> => {
-    try {
-      const docEl = document.documentElement as HTMLElement & {
-        requestFullscreen?: (opts?: { navigationUI?: string }) => Promise<void>;
-        webkitRequestFullscreen?: () => Promise<void>;
-      };
-      if (docEl.requestFullscreen) {
-        await docEl.requestFullscreen({ navigationUI: 'hide' });
-      } else if (docEl.webkitRequestFullscreen) {
-        await docEl.webkitRequestFullscreen();
-      }
-    } catch {
-      try {
-        const el = gameContainer as HTMLElement & { requestFullscreen?: () => Promise<void>; webkitRequestFullscreen?: () => Promise<void> };
-        const requestFs = el.requestFullscreen ?? el.webkitRequestFullscreen;
-        if (requestFs) {
-          await requestFs.call(el);
-        }
-      } catch {
-        // Fullscreen may fail (e.g. iOS), continue
-      }
-    }
-
-    try {
-      if (screen.orientation?.lock) {
-        await screen.orientation.lock('landscape-primary');
-      }
-    } catch {
-      // Orientation lock may fail (e.g. iOS Safari), continue
-    }
-
-    tapOverlay.removeEventListener('click', startGame);
-    tapOverlay.removeEventListener('touchend', startGame);
-    tapOverlay.remove();
-  };
-
-  tapOverlay.addEventListener('click', (e) => {
-    e.preventDefault();
-    startGame();
-  });
-  tapOverlay.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    startGame();
-  });
 }
 
 function initPortraitOverlay(): void {
@@ -96,5 +43,4 @@ function initPortraitOverlay(): void {
   mediaQuery.addEventListener('change', updatePortraitOverlay);
 }
 
-initMobileTapOverlay();
 initPortraitOverlay();

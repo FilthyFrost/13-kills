@@ -22,6 +22,8 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    const canvas = this.sys.game.canvas;
+    Phaser.Display.Canvas.TouchAction(canvas, 'none');
     this.scene.start('MainMenu');
   }
 }

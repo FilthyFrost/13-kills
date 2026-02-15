@@ -41,30 +41,6 @@
     canvas {
       display: block;
       image-rendering: auto;
-      touch-action: manipulation;
-    }
-    #mobile-tap-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #1a1a1a;
-      z-index: 9998;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      touch-action: manipulation;
-      pointer-events: none;
-    }
-    #mobile-tap-overlay.visible {
-      display: flex;
-      pointer-events: auto;
-    }
-    #mobile-tap-overlay p {
-      color: #b22222;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 18px;
-      text-align: center;
-      padding: 1rem;
     }
     #portrait-overlay {
       display: none;
@@ -92,7 +68,6 @@
 </head>
 <body>
   <div id="game-container"></div>
-  <div id="mobile-tap-overlay"><p>点击屏幕开始游戏</p></div>
   <div id="portrait-overlay"><p>请旋转设备至横屏</p></div>
   <script type="module" src="/src/ui/web/mobileInit.ts"></script>
   <script type="module" src="/src/ui/web/main.ts"></script>

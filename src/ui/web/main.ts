@@ -19,6 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     orientation: Phaser.Scale.LANDSCAPE,
+    fullscreenTarget: 'game-container',
   },
   render: {
     pixelArt: true,

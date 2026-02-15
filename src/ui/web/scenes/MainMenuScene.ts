@@ -118,13 +118,59 @@ export class MainMenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    const isMobile = this.sys.game.device.input.touch;
+
+    if (isMobile) {
+      this.showTapToStartOverlay(cx);
+    } else {
+      this.showMenuButtons(cx);
+    }
+  }
+
+  private showTapToStartOverlay(cx: number): void {
+    const zone = this.add.zone(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT).setInteractive();
+    zone.setDepth(200);
+    zone.setScrollFactor(0);
+
+    const text = this.add
+      .text(cx, HEIGHT / 2, '点击屏幕开始游戏', {
+        fontSize: '18px',
+        color: '#b22222',
+        fontFamily: PIXEL_FONT,
+      })
+      .setOrigin(0.5)
+      .setDepth(199)
+      .setScrollFactor(0);
+
+    zone.on('pointerup', () => {
+      zone.destroy();
+      text.destroy();
+
+      try {
+        this.scale.startFullscreen();
+      } catch {
+        // Fullscreen may fail
+      }
+      try {
+        if (screen.orientation?.lock) {
+          screen.orientation.lock('landscape-primary');
+        }
+      } catch {
+        // Orientation lock may fail
+      }
+
+      this.showMenuButtons(cx);
+    });
+  }
+
+  private showMenuButtons(cx: number): void {
     const hasSave = hasSavedGame();
 
-    const newRunBtn = createMenuButton(this, cx, HEIGHT * 0.52, 'NEW RUN', true, undefined, () => {
+    createMenuButton(this, cx, HEIGHT * 0.52, 'NEW RUN', true, undefined, () => {
       this.scene.start('Battle');
     });
 
-    const continueBtn = createMenuButton(
+    createMenuButton(
       this,
       cx,
       HEIGHT * 0.62,
