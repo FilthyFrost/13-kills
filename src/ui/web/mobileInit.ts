@@ -2,7 +2,7 @@
  * 移动端初始化：竖屏提示、防滑动、添加到主屏幕引导
  */
 
-const PWA_DISMISS_KEY = '13kills_pwa_dismissed_v2';
+const PWA_DISMISS_KEY = '13kills_pwa_dismissed_v3';
 
 function isMobile(): boolean {
   return (
@@ -103,6 +103,7 @@ function initPwaPrompt(): void {
 
   window.addEventListener('load', () => {
     setTimeout(checkAndShow, 300);
+    setTimeout(checkAndShow, 800);
     setTimeout(() => window.scrollTo(0, 1), 100);
   });
 
