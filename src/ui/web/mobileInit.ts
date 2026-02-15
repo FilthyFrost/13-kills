@@ -32,7 +32,7 @@ function updatePortraitOverlay(): void {
   const overlay = document.getElementById('portrait-overlay');
   if (!overlay) return;
 
-  if (isPortrait() && isMobile()) {
+  if (isPortrait() && isMobile() && isStandalone()) {
     overlay.classList.add('visible');
     overlay.style.visibility = 'visible';
     overlay.style.pointerEvents = 'auto';
@@ -58,12 +58,17 @@ function initPwaPrompt(): void {
   }
 
   const showPrompt = (): void => {
-    if (isPortrait()) return;
     overlay.classList.add('visible');
     if (isIOS()) {
-      instructions.textContent = 'Safari/Chrome：点击底部分享按钮 → 添加到主屏幕';
+      instructions.innerHTML =
+        '1. 点击浏览器框上的分享按钮（见上方图标）<br>' +
+        '2. 下拉找到「Add to Home Screen」或「加入主页面」<br>' +
+        '3. 享受全屏游戏的快乐';
     } else {
-      instructions.textContent = '点击浏览器菜单 → 安装应用 或 添加到主屏幕';
+      instructions.innerHTML =
+        '1. 点击浏览器框上的分享按钮（见上方图标）<br>' +
+        '2. 找到「安装应用」或「添加到主屏幕」<br>' +
+        '3. 享受全屏游戏的快乐';
     }
   };
 
@@ -83,7 +88,7 @@ function initPwaPrompt(): void {
   });
 
   const checkAndShow = (): void => {
-    if (!isPortrait() && isMobile() && !isStandalone()) {
+    if (isMobile() && !isStandalone()) {
       showPrompt();
     } else {
       overlay.classList.remove('visible');

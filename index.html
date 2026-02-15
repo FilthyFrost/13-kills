@@ -38,6 +38,8 @@
       min-height: 100vh;
       min-height: 100dvh;
       touch-action: manipulation;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      background: #1a1a1a;
     }
     canvas {
       display: block;
@@ -105,6 +107,14 @@
       font-size: 12px;
       cursor: pointer;
     }
+    #pwa-share-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.75rem;
+    }
+    #pwa-prompt-overlay .step {
+      margin-bottom: 0.25rem;
+    }
   </style>
 </head>
 <body>
@@ -112,8 +122,11 @@
   <div id="portrait-overlay"><p>请旋转设备至横屏</p></div>
   <div id="pwa-prompt-overlay">
     <h3>获得全屏体验</h3>
-    <p>添加到主屏幕后，从主屏幕打开可隐藏浏览器地址栏，获得完整游戏画面。</p>
-    <p id="pwa-instructions">点击分享按钮 → 添加到主屏幕</p>
+    <svg id="pwa-share-icon" viewBox="0 0 24 24" fill="none" stroke="#cccccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="9" width="14" height="11" rx="1" />
+      <path d="M12 9V3M12 3L9 6M12 3L15 6" />
+    </svg>
+    <p id="pwa-instructions" class="step"></p>
     <button class="btn" id="pwa-dismiss">知道了</button>
   </div>
   <script type="module" src="/src/ui/web/mobileInit.ts"></script>
