@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>13 KILLS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +15,7 @@
       position: fixed;
       overflow: hidden;
       overscroll-behavior: none;
-      touch-action: none;
+      touch-action: manipulation;
       -webkit-user-select: none;
       user-select: none;
       width: 100%;
@@ -34,25 +36,28 @@
       height: 100%;
       min-height: 100vh;
       min-height: 100dvh;
-      touch-action: none;
+      touch-action: manipulation;
     }
     canvas {
       display: block;
       image-rendering: auto;
+      touch-action: manipulation;
     }
     #mobile-tap-overlay {
       display: none;
       position: fixed;
       inset: 0;
       background: #1a1a1a;
-      z-index: 9999;
+      z-index: 9998;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      touch-action: none;
+      touch-action: manipulation;
+      pointer-events: none;
     }
     #mobile-tap-overlay.visible {
       display: flex;
+      pointer-events: auto;
     }
     #mobile-tap-overlay p {
       color: #b22222;
@@ -66,13 +71,15 @@
       position: fixed;
       inset: 0;
       background: #1a1a1a;
-      z-index: 9998;
+      z-index: 9999;
       justify-content: center;
       align-items: center;
-      touch-action: none;
+      touch-action: manipulation;
+      pointer-events: none;
     }
     #portrait-overlay.visible {
       display: flex;
+      pointer-events: auto;
     }
     #portrait-overlay p {
       color: #b22222;

@@ -26,6 +26,9 @@ const config: Phaser.Types.Core.GameConfig = {
     roundPixels: true,
   },
   scene: [BootScene, MainMenuScene, BattleScene, GameOverScene],
+  input: {
+    touch: { capture: true },
+  },
   physics: {
     default: 'arcade',
     arcade: { debug: false },

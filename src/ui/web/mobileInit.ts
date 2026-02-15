@@ -9,12 +9,17 @@ function isMobile(): boolean {
   );
 }
 
+function isPortrait(): boolean {
+  const mediaMatches = window.matchMedia('(orientation: portrait)').matches;
+  const sizeMatches = window.innerHeight > window.innerWidth;
+  return mediaMatches || sizeMatches;
+}
+
 function updatePortraitOverlay(): void {
   const overlay = document.getElementById('portrait-overlay');
   if (!overlay) return;
 
-  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-  if (isPortrait && isMobile()) {
+  if (isPortrait() && isMobile()) {
     overlay.classList.add('visible');
   } else {
     overlay.classList.remove('visible');
@@ -34,13 +39,25 @@ function initMobileTapOverlay(): void {
 
   const startGame = async (): Promise<void> => {
     try {
-      const el = gameContainer as HTMLElement & { requestFullscreen?: () => Promise<void>; webkitRequestFullscreen?: () => Promise<void> };
-      const requestFs = el.requestFullscreen ?? el.webkitRequestFullscreen;
-      if (requestFs) {
-        await requestFs.call(el);
+      const docEl = document.documentElement as HTMLElement & {
+        requestFullscreen?: (opts?: { navigationUI?: string }) => Promise<void>;
+        webkitRequestFullscreen?: () => Promise<void>;
+      };
+      if (docEl.requestFullscreen) {
+        await docEl.requestFullscreen({ navigationUI: 'hide' });
+      } else if (docEl.webkitRequestFullscreen) {
+        await docEl.webkitRequestFullscreen();
       }
     } catch {
-      // Fullscreen may fail (e.g. iOS), continue
+      try {
+        const el = gameContainer as HTMLElement & { requestFullscreen?: () => Promise<void>; webkitRequestFullscreen?: () => Promise<void> };
+        const requestFs = el.requestFullscreen ?? el.webkitRequestFullscreen;
+        if (requestFs) {
+          await requestFs.call(el);
+        }
+      } catch {
+        // Fullscreen may fail (e.g. iOS), continue
+      }
     }
 
     try {
@@ -51,9 +68,9 @@ function initMobileTapOverlay(): void {
       // Orientation lock may fail (e.g. iOS Safari), continue
     }
 
-    tapOverlay.classList.remove('visible');
     tapOverlay.removeEventListener('click', startGame);
     tapOverlay.removeEventListener('touchend', startGame);
+    tapOverlay.remove();
   };
 
   tapOverlay.addEventListener('click', (e) => {
@@ -72,6 +89,8 @@ function initPortraitOverlay(): void {
   window.addEventListener('orientationchange', () => {
     setTimeout(updatePortraitOverlay, 100);
   });
+
+  window.addEventListener('resize', updatePortraitOverlay);
 
   const mediaQuery = window.matchMedia('(orientation: portrait)');
   mediaQuery.addEventListener('change', updatePortraitOverlay);
