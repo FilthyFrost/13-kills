@@ -127,5 +127,35 @@ function initPortraitOverlay(): void {
   mediaQuery.addEventListener('change', updatePortraitOverlay);
 }
 
+const STANDALONE_SAFE_INSET = { top: 59, right: 52, bottom: 38, left: 52 };
+const CROP_THRESHOLD = 20;
+
+function initStandaloneSafeArea(): void {
+  if (!isStandalone() || !isMobile()) return;
+
+  const container = document.getElementById('game-container');
+  if (!container) return;
+
+  const applySafeArea = (): void => {
+    const rect = container.getBoundingClientRect();
+    if (rect.top < CROP_THRESHOLD) {
+      container.style.top = `${STANDALONE_SAFE_INSET.top}px`;
+      container.style.bottom = `${STANDALONE_SAFE_INSET.bottom}px`;
+      container.style.left = `${STANDALONE_SAFE_INSET.left}px`;
+      container.style.right = `${STANDALONE_SAFE_INSET.right}px`;
+      window.dispatchEvent(new Event('resize'));
+    }
+  };
+
+  window.addEventListener('load', () => {
+    setTimeout(applySafeArea, 100);
+    setTimeout(applySafeArea, 500);
+  });
+
+  window.addEventListener('resize', applySafeArea);
+  window.addEventListener('orientationchange', () => setTimeout(applySafeArea, 150));
+}
+
 initPortraitOverlay();
 initPwaPrompt();
+initStandaloneSafeArea();

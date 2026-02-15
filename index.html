@@ -50,13 +50,11 @@
       background: #1a1a1a;
     }
     @media (display-mode: standalone) {
-      @supports (padding: max(0px)) {
-        #game-container {
-          top: max(env(safe-area-inset-top), 44px);
-          bottom: max(env(safe-area-inset-bottom), 34px);
-          left: max(env(safe-area-inset-left), 44px);
-          right: max(env(safe-area-inset-right), 44px);
-        }
+      #game-container {
+        top: max(env(safe-area-inset-top), 59px);
+        bottom: max(env(safe-area-inset-bottom), 38px);
+        left: max(env(safe-area-inset-left), 52px);
+        right: max(env(safe-area-inset-right), 52px);
       }
     }
     canvas {
