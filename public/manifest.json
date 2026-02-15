@@ -1,0 +1,22 @@
+{
+  "name": "13 KILLS",
+  "short_name": "13 KILLS",
+  "description": "13点卡牌对战",
+  "start_url": "/13-kills/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/13-kills/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/13-kills/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
