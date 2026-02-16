@@ -3,7 +3,7 @@
  */
 
 import Phaser from 'phaser';
-import { WIDTH, HEIGHT } from '../config';
+import { WIDTH, HEIGHT, BATTLE_LAYOUT, BOSS_LAYOUT } from '../config';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { RoundDisplay } from '../components/RoundDisplay';
 import { HealthBar } from '../components/HealthBar';
@@ -16,6 +16,10 @@ import { EndTurnButton } from '../components/EndTurnButton';
 import { SpeedPanel } from '../components/SpeedPanel';
 import { SurrenderButton } from '../components/SurrenderButton';
 import { StatsPanel } from '../components/StatsPanel';
+import { DebuffIcons } from '../components/DebuffIcons';
+import { BossSkillIcon } from '../components/BossSkillIcon';
+import { BossShowcase } from '../components/BossShowcase';
+import { BossInfoPanel } from '../components/BossInfoPanel';
 import { connect } from '../bridge';
 
 export class BattleScene extends Phaser.Scene {
@@ -25,6 +29,10 @@ export class BattleScene extends Phaser.Scene {
   private enemyPortrait!: PortraitFrame;
   private playerStats!: StatsPanel;
   private enemyStats!: StatsPanel;
+  private playerDebuffIcons!: DebuffIcons;
+  private bossSkillIcon!: BossSkillIcon;
+  private bossShowcase!: BossShowcase;
+  private bossInfoPanel!: BossInfoPanel;
   private playerHealth!: HealthBar;
   private enemyHealth!: HealthBar;
   private playerHand!: CardHand;
@@ -48,37 +56,47 @@ export class BattleScene extends Phaser.Scene {
     this.speedPanel = new SpeedPanel(this, 100, 50);
     this.surrenderButton = new SurrenderButton(this, 100, 112);
 
-    // 玩家区域（左下）：StatsPanel 在头像左侧，与头像、牌堆拉开间距
-    this.playerStats = new StatsPanel(this, 38, HEIGHT - 100, false);
-    this.playerPortrait = new PortraitFrame(this, 130, HEIGHT - 100, 80);
-    this.playerHealth = new HealthBar(this, 90, HEIGHT - 50, 120, 16);
-    this.playerHand = new CardHand(this, WIDTH / 2, HEIGHT - 140);
+    // 玩家区域（左下）：使用 BATTLE_LAYOUT
+    const pl = BATTLE_LAYOUT;
+    this.playerStats = new StatsPanel(this, pl.playerStats.x, pl.playerStats.y, false);
+    this.playerDebuffIcons = new DebuffIcons(this, pl.playerDebuff.x, pl.playerDebuff.y);
+    this.playerPortrait = new PortraitFrame(this, pl.playerPortrait.x, pl.playerPortrait.y, 120);
+    this.playerHealth = new HealthBar(this, pl.playerHealth.x, pl.playerHealth.y, 120, 16);
+    this.playerHand = new CardHand(this, pl.playerHand.x, pl.playerHand.y);
     this.playerSumDisplay = new HandSumDisplay(
       this,
-      WIDTH / 2 + 120,
-      HEIGHT - 140,
+      pl.playerHand.x + 120,
+      pl.playerHand.y,
       'right'
     );
-    this.playerDeck = new DeckPile(this, 260, HEIGHT - 120);
+    this.playerDeck = new DeckPile(this, pl.playerDeck.x, pl.playerDeck.y);
 
-    // 敌人区域（右上）：StatsPanel 在头像右侧，镜像
+    // 敌人区域（右上）：普通敌用 BATTLE_LAYOUT，BOSS 用 BOSS_LAYOUT
+    const bl = BOSS_LAYOUT;
+    this.bossShowcase = new BossShowcase(this, bl.bossShowcase.x, bl.bossShowcase.y);
+    this.bossInfoPanel = new BossInfoPanel(this, pl.bossInfoPanel.x, pl.bossInfoPanel.y);
+    this.bossSkillIcon = new BossSkillIcon(this, bl.bossTrait.x, bl.bossTrait.y);
     this.enemyPortrait = new PortraitFrame(this, WIDTH - 130, 100, 80);
     this.enemyStats = new StatsPanel(this, WIDTH - 38, 100, true);
-    this.enemyHealth = new HealthBar(this, WIDTH - 210, 140, 120, 16);
-    this.enemyHand = new CardHand(this, WIDTH / 2, 200);
+    this.enemyHealth = new HealthBar(this, pl.enemyHealth.x, pl.enemyHealth.y, 120, 16);
+    this.enemyHand = new CardHand(this, pl.enemyHand.x, pl.enemyHand.y);
     this.enemySumDisplay = new HandSumDisplay(
       this,
-      WIDTH / 2 - 120,
-      200,
+      pl.enemyHand.x - 120,
+      pl.enemyHand.y,
       'left'
     );
-    this.enemyDeck = new DeckPile(this, WIDTH - 260, 200);
+    this.enemyDeck = new DeckPile(this, pl.enemyDeck.x, pl.enemyDeck.y);
 
     // 按钮（右下）
     this.drawButton = new DrawButton(this, WIDTH - 280, HEIGHT - 80);
     this.endTurnButton = new EndTurnButton(this, WIDTH - 120, HEIGHT - 80);
 
-    connect(this);
+    const initData = (this.scene.settings.data ?? {}) as {
+      fromMap?: boolean;
+      nodeId?: string;
+    };
+    connect(this, initData);
   }
 
   getRoundDisplay(): RoundDisplay {
@@ -89,6 +107,9 @@ export class BattleScene extends Phaser.Scene {
   }
   getEnemyStats(): StatsPanel {
     return this.enemyStats;
+  }
+  getEnemyPortrait(): PortraitFrame {
+    return this.enemyPortrait;
   }
   getPlayerHealth(): HealthBar {
     return this.playerHealth;
@@ -123,12 +144,28 @@ export class BattleScene extends Phaser.Scene {
   getSurrenderButton(): SurrenderButton {
     return this.surrenderButton;
   }
+  getPlayerDebuffIcons(): DebuffIcons {
+    return this.playerDebuffIcons;
+  }
+  getBossSkillIcon(): BossSkillIcon {
+    return this.bossSkillIcon;
+  }
+  getBossShowcase(): BossShowcase {
+    return this.bossShowcase;
+  }
+  getBossInfoPanel(): BossInfoPanel {
+    return this.bossInfoPanel;
+  }
 
   shutdown(): void {
     this.background?.destroy();
     this.roundDisplay?.destroy();
     this.playerPortrait?.destroy();
     this.enemyPortrait?.destroy();
+    this.playerDebuffIcons?.destroy();
+    this.bossSkillIcon?.destroy();
+    this.bossShowcase?.destroy();
+    this.bossInfoPanel?.destroy();
     this.playerStats?.destroy();
     this.enemyStats?.destroy();
     this.playerHealth?.destroy();

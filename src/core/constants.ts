@@ -4,4 +4,4 @@
 
 export const INITIAL_HP = 30;
 export const BASE_ATTACK = 5;
-export const BASE_DEFENSE = 2;
+export const BASE_DEFENSE = 0;

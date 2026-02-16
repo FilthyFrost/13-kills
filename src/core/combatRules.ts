@@ -7,6 +7,13 @@
 
 import type { RoundResult, RoundOutcome, DamageCalculation } from './types';
 import type { Hand } from './hand';
+import type { HandSumContext } from './card';
+
+/** 回合结算上下文（稻草人稻草卡等） */
+export interface ResolveRoundContext {
+  /** 敌人手牌稻草卡可当 1 使用（稻草人 Stand 12 点时） */
+  enemyStrawAsOne?: boolean;
+}
 
 function buildDamageCalculation(
   attackerAttack: number,
@@ -44,12 +51,17 @@ export const CombatRules = {
     playerAttack: number,
     playerDefense: number,
     enemyAttack: number,
-    enemyDefense: number
+    enemyDefense: number,
+    context?: ResolveRoundContext
   ): RoundResult {
+    const enemySumContext: HandSumContext | undefined = context?.enemyStrawAsOne
+      ? { strawAsOne: true }
+      : undefined;
     const playerBust = playerHand.isBust();
-    const enemyBust = enemyHand.isBust();
+    const enemyBust = enemyHand.isBust(enemySumContext);
+    const enemySumWithCtx = enemyHand.sum(enemySumContext);
     const playerPerfect = playerHand.isPerfect();
-    const enemyPerfect = enemyHand.isPerfect();
+    const enemyPerfect = enemyHand.isPerfect(enemySumContext);
 
     // 双方都 BUST → 平局，不掉血，COMBO 重置为 1
     if (playerBust && enemyBust) {
@@ -110,7 +122,7 @@ export const CombatRules = {
 
     // 都未 BUST：比点数
     const playerSum = playerHand.sum();
-    const enemySum = enemyHand.sum();
+    const enemySum = enemyHand.sum(enemySumContext);
 
     if (playerSum > enemySum) {
       let combo = currentCombo;

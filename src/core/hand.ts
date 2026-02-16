@@ -4,6 +4,7 @@
  */
 
 import type { Card } from './card';
+import type { HandSumContext } from './card';
 import { computeOptimalHandSum } from './card';
 
 /** 手牌点数上限 */
@@ -18,19 +19,19 @@ export class Hand {
     this.cards.push(card);
   }
 
-  /** 手牌点数总和（A 可当 1 或 7，自动选最优） */
-  sum(): number {
-    return computeOptimalHandSum(this.cards);
+  /** 手牌点数总和（A 可当 1 或 7，自动选最优；支持稻草卡等上下文） */
+  sum(context?: HandSumContext): number {
+    return computeOptimalHandSum(this.cards, context);
   }
 
   /** 是否爆牌（点数 > 13） */
-  isBust(): boolean {
-    return this.sum() > MAX_HAND;
+  isBust(context?: HandSumContext): boolean {
+    return this.sum(context) > MAX_HAND;
   }
 
   /** 是否完美（点数 == 13） */
-  isPerfect(): boolean {
-    return this.sum() === MAX_HAND;
+  isPerfect(context?: HandSumContext): boolean {
+    return this.sum(context) === MAX_HAND;
   }
 
   /** 清空手牌 */

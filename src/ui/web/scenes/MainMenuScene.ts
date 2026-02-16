@@ -167,7 +167,8 @@ export class MainMenuScene extends Phaser.Scene {
     const hasSave = hasSavedGame();
 
     createMenuButton(this, cx, HEIGHT * 0.52, 'NEW RUN', true, undefined, () => {
-      this.scene.start('Battle');
+      this.registry.remove('mapData');
+      this.scene.start('Map');
     });
 
     createMenuButton(
@@ -179,7 +180,7 @@ export class MainMenuScene extends Phaser.Scene {
       hasSave ? undefined : '暂无存档',
       hasSave
         ? () => {
-            this.scene.start('Battle');
+            this.scene.start('Map');
           }
         : undefined
     );

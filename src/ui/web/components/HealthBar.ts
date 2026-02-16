@@ -13,6 +13,8 @@ export class HealthBar {
   private y: number;
   private width: number;
   private height: number;
+  private currentHP = 10;
+  private maxHP = 10;
 
   constructor(
     scene: Phaser.Scene,
@@ -46,7 +48,22 @@ export class HealthBar {
     this.setHP(10, 10);
   }
 
+  setVisible(visible: boolean): void {
+    this.bgBar.setVisible(visible);
+    this.fillBar.setVisible(visible);
+    this.text.setVisible(visible);
+  }
+
+  setPosition(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
+    this.text.setPosition(x + this.width / 2, y + this.height / 2);
+    this.setHP(this.currentHP, this.maxHP);
+  }
+
   setHP(current: number, max: number): void {
+    this.currentHP = current;
+    this.maxHP = max;
     this.text.setText(`${current}/${max}`);
     this.bgBar.clear();
     this.bgBar.fillStyle(COLORS.bgMid, 1);

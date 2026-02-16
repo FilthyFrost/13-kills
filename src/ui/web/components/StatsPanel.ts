@@ -1,9 +1,10 @@
 /**
- * 攻击/防御面板 - 使用图片图标，参考图3长宽比
+ * 攻击/防御面板 - 使用图片图标，参考图3长宽比 - 图标上下弹跳
  */
 
 import Phaser from 'phaser';
 import { PIXEL_STATS_FONT } from '../config';
+import { addIconBounce } from '../utils/idleAnimations';
 
 const PANEL_WIDTH = 44;
 const PANEL_HEIGHT = 72;
@@ -55,14 +56,18 @@ export class StatsPanel {
   private attackText: Phaser.GameObjects.Text;
   private defenseText: Phaser.GameObjects.Text;
   private mirrored: boolean;
+  private lightBg: boolean;
+  private bounceTweens: Phaser.Tweens.Tween[] = [];
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
-    mirrored: boolean = false
+    mirrored: boolean = false,
+    lightBg: boolean = false
   ) {
     this.mirrored = mirrored;
+    this.lightBg = lightBg;
     this.container = scene.add.container(x, y);
     this.container.setDepth(45);
     this.container.setScrollFactor(0);
@@ -81,14 +86,14 @@ export class StatsPanel {
     this.attackText = scene.add
       .text(0, 0, '5', {
         fontSize: '8px',
-        color: '#ffffff',
+        color: lightBg ? '#000000' : '#ffffff',
         fontFamily: PIXEL_STATS_FONT,
       })
       .setOrigin(mirrored ? 1 : 0, 0.5);
     this.defenseText = scene.add
       .text(0, 0, '2', {
         fontSize: '8px',
-        color: '#ffffff',
+        color: lightBg ? '#000000' : '#ffffff',
         fontFamily: PIXEL_STATS_FONT,
       })
       .setOrigin(mirrored ? 1 : 0, 0.5);
@@ -103,6 +108,8 @@ export class StatsPanel {
     ]);
 
     this.draw(5, 2);
+    this.bounceTweens.push(addIconBounce(scene, this.attackIcon));
+    this.bounceTweens.push(addIconBounce(scene, this.defenseIcon));
   }
 
   private draw(attack: number, defense: number): void {
@@ -112,11 +119,17 @@ export class StatsPanel {
     const halfH = h / 2;
 
     this.bg.clear();
-    this.bg.fillStyle(0x000000, 1);
+    this.bg.fillStyle(this.lightBg ? 0xffffff : 0x000000, 1);
     this.bg.fillRoundedRect(-halfW, -halfH, w, h, 4);
 
     this.border.clear();
     drawDashedBorder(this.border, -halfW + 1, -halfH + 1, w - 2, h - 2);
+
+    const textColor = this.lightBg ? '#000000' : '#ffffff';
+    this.attackText.setColor(textColor);
+    this.defenseText.setColor(textColor);
+    this.attackIcon.setTint(this.lightBg ? 0x000000 : 0xffffff);
+    this.defenseIcon.setTint(this.lightBg ? 0x000000 : 0xffffff);
 
     const row1Y = -halfH + PAD + 14;
     const row2Y = halfH - PAD - 14;
@@ -148,7 +161,25 @@ export class StatsPanel {
     this.draw(attack, defense);
   }
 
+  setVisible(visible: boolean): void {
+    this.container.setVisible(visible);
+  }
+
+  setPosition(x: number, y: number): void {
+    this.container.setPosition(x, y);
+  }
+
+  setLightBg(light: boolean): void {
+    if (this.lightBg === light) return;
+    this.lightBg = light;
+    const attack = parseInt(this.attackText.text, 10) || 0;
+    const defense = parseInt(this.defenseText.text, 10) || 0;
+    this.draw(attack, defense);
+  }
+
   destroy(): void {
+    this.bounceTweens.forEach((t) => t.remove());
+    this.bounceTweens = [];
     this.container.destroy();
   }
 }

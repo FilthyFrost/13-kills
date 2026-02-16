@@ -47,6 +47,10 @@ export class DeckPile {
     }
   }
 
+  setPosition(x: number, y: number): void {
+    this.container.setPosition(x, y);
+  }
+
   getContainer(): Phaser.GameObjects.Container {
     return this.container;
   }

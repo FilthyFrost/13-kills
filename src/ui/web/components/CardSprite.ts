@@ -1,16 +1,22 @@
 /**
- * 单张卡牌 5:7 比例 - 优先使用纹理素材，支持翻牌动画
+ * 单张卡牌 5:7 比例 - 优先使用纹理素材，支持翻牌动画，支持 Card Status 图标
  */
 
 import Phaser from 'phaser';
 import type { Card } from '../../../core/card';
-import { CARD_WIDTH, CARD_HEIGHT, COLORS, PIXEL_FONT } from '../config';
+import { CARD_WIDTH, CARD_HEIGHT, COLORS, PIXEL_FONT, ANIM } from '../config';
+import { addPendulumSway } from '../utils/idleAnimations';
+
+const CARD_STATUS_ICON_SIZE = 16;
+const CARD_STATUS_ICON_Y = CARD_HEIGHT / 2 - 10;
 
 export class CardSprite {
   private container: Phaser.GameObjects.Container;
+  private swayTween: Phaser.Tweens.Tween | null = null;
   private bg: Phaser.GameObjects.Graphics;
   private cardImage: Phaser.GameObjects.Image | null = null;
   private rankText: Phaser.GameObjects.Text;
+  private cardStatusIcon: Phaser.GameObjects.Image | null = null;
   private faceUp: boolean = true;
   private currentCard: Card | null = null;
 
@@ -29,6 +35,10 @@ export class CardSprite {
 
     this.container.add([this.bg, this.rankText]);
     this.container.setDepth(60);
+    this.swayTween = addPendulumSway(scene, this.container, {
+      angle: 1.5,
+      duration: ANIM.pendulumCardDuration ?? 2000,
+    });
   }
 
   setCard(card: Card | null): void {
@@ -50,6 +60,10 @@ export class CardSprite {
       this.cardImage.destroy();
       this.cardImage = null;
     }
+    if (this.cardStatusIcon) {
+      this.cardStatusIcon.destroy();
+      this.cardStatusIcon = null;
+    }
 
     if (!this.currentCard) {
       this.rankText.setVisible(false);
@@ -60,23 +74,35 @@ export class CardSprite {
     const textures = this.scene.textures;
     const hasTextures = textures.exists('card_back');
 
-    if (hasTextures) {
-      const key = this.faceUp ? `card_${this.currentCard.rank}` : 'card_back';
-      if (textures.exists(key)) {
-        this.cardImage = this.scene.add.image(0, 0, key);
-        this.cardImage.setDisplaySize(CARD_WIDTH, CARD_HEIGHT);
-        this.container.addAt(this.cardImage, 0);
-        this.rankText.setVisible(false);
-        this.bg.clear();
-        this.bg.lineStyle(2, COLORS.textDim, 0.5);
-        this.bg.strokeRoundedRect(-CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT, 6);
-        return;
-      }
+    const cardKey = this.faceUp
+      ? this.currentCard.rank === '0'
+        ? 'card_straw'
+        : `card_${this.currentCard.rank}`
+      : 'card_back';
+
+    if (hasTextures && textures.exists(cardKey)) {
+      this.cardImage = this.scene.add.image(0, 0, cardKey);
+      this.cardImage.setDisplaySize(CARD_WIDTH, CARD_HEIGHT);
+      this.container.addAt(this.cardImage, 0);
+      this.rankText.setVisible(false);
+      this.bg.clear();
+      this.bg.lineStyle(2, COLORS.textDim, 0.5);
+      this.bg.strokeRoundedRect(-CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT, 6);
+    } else {
+      this.rankText.setText(this.currentCard.rank === '0' ? '0' : this.currentCard.rank);
+      this.rankText.setVisible(this.faceUp);
+      this.drawFallback(true);
     }
 
-    this.rankText.setText(this.currentCard.rank);
-    this.rankText.setVisible(this.faceUp);
-    this.drawFallback(true);
+    if (this.faceUp && this.currentCard.cardStatus) {
+      const statusKey = 'cardstatus_delete';
+      if (textures.exists(statusKey)) {
+        this.cardStatusIcon = this.scene.add.image(0, CARD_STATUS_ICON_Y, statusKey);
+        this.cardStatusIcon.setDisplaySize(CARD_STATUS_ICON_SIZE, CARD_STATUS_ICON_SIZE);
+        this.cardStatusIcon.setOrigin(0.5);
+        this.container.add(this.cardStatusIcon);
+      }
+    }
   }
 
   private drawFallback(hasCard: boolean): void {
@@ -153,6 +179,8 @@ export class CardSprite {
   }
 
   destroy(): void {
+    this.swayTween?.remove();
+    this.swayTween = null;
     this.container.destroy();
   }
 }

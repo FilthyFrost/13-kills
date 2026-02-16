@@ -5,6 +5,7 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
+import { MapScene } from './scenes/MapScene';
 import { BattleScene } from './scenes/BattleScene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { WIDTH, HEIGHT } from './config';
@@ -26,7 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
     antialias: false,
     roundPixels: true,
   },
-  scene: [BootScene, MainMenuScene, BattleScene, GameOverScene],
+  scene: [BootScene, MainMenuScene, MapScene, BattleScene, GameOverScene],
   input: {
     touch: { capture: true },
   },

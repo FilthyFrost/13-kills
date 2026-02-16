@@ -12,6 +12,7 @@ export class EndTurnButton {
   private text: Phaser.GameObjects.Text;
   private enabled: boolean = true;
   private onClickCb?: () => void;
+  private onDisabledClickCb?: () => void;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const w = 140;
@@ -21,6 +22,7 @@ export class EndTurnButton {
     this.zone.setDepth(500);
     this.zone.on('pointerdown', () => {
       if (this.enabled && this.onClickCb) this.onClickCb();
+      else if (!this.enabled && this.onDisabledClickCb) this.onDisabledClickCb();
     });
 
     this.container = scene.add.container(x, y);
@@ -52,8 +54,16 @@ export class EndTurnButton {
     this.draw();
   }
 
+  setLabel(text: string): void {
+    this.text.setText(text);
+  }
+
   setOnClick(cb: () => void): void {
     this.onClickCb = cb;
+  }
+
+  setOnDisabledClick(cb?: () => void): void {
+    this.onDisabledClickCb = cb;
   }
 
   private draw(): void {

@@ -49,6 +49,11 @@ export class DrawButton {
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
     this.text.setColor(enabled ? '#ffffff' : '#555555');
+    if (enabled) {
+      this.zone.setInteractive({ useHandCursor: true });
+    } else {
+      this.zone.disableInteractive();
+    }
     this.draw();
   }
 

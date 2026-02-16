@@ -3,8 +3,17 @@
  * 通用类型定义，便于扩展神/魔/铭刻/诅咒等
  */
 
-/** 卡牌点数（白卡版：A-6） */
-export type CardRank = 'A' | '2' | '3' | '4' | '5' | '6';
+/** 卡牌点数（白卡版：A-6，稻草卡为 0，稻草人牌组含 7） */
+export type CardRank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '0';
+
+/** Card Status 标识（卡牌特性） */
+export type CardStatusId = 'DELETE';
+
+/** BUFF/DEBUFF 标识 */
+export type BuffId = 'LAZY';
+
+/** BOSS 标识 */
+export type BossId = 'SCARECROW';
 
 /** 玩家/敌人行动 */
 export type Action = 'HIT' | 'STAND';

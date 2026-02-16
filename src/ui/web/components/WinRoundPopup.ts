@@ -8,6 +8,7 @@ import { WIDTH, HEIGHT, PIXEL_FONT, ANIM } from '../config';
 import { showDamageBubble } from './DamageBubble';
 import { playDamageNumberEffect } from './DamageNumberEffect';
 import { showDamageCalculationDisplay } from './DamageCalculationDisplay';
+import type { HealthBar } from './HealthBar';
 
 function getRoundResultMessage(result: RoundResult): string {
   if (result.outcome === 'DRAW') return 'DRAW';
@@ -19,15 +20,17 @@ function getRoundResultMessage(result: RoundResult): string {
 }
 
 /**
- * 播放平局动画：显示 "DRAW"
+ * 播放平局动画：显示 "DRAW" 或 "BOTH BUSTED!"（双方爆牌时）
  */
 export function playDrawSequence(
   scene: Phaser.Scene,
-  onComplete: () => void
+  onComplete: () => void,
+  result?: RoundResult
 ): void {
   const cx = WIDTH / 2;
   const cy = HEIGHT / 2 - 60;
-  const message = 'DRAW';
+  const message =
+    result?.playerBust && result?.enemyBust ? 'BOTH BUSTED!' : 'DRAW';
 
   const winText = scene.add
     .text(cx, cy, message, {
@@ -78,13 +81,21 @@ export function playDrawSequence(
  * @param enemyPortraitX 敌人头像 X（用于伤害气泡箭头和 -1 位置）
  * @param enemyPortraitY 敌人头像 Y
  * @param onComplete 全部完成回调
+ * @param enemyHealthBar 敌人血量条（用于实时扣血）
+ * @param enemyHPBeforeDamage 伤害前敌人 HP
+ * @param enemyMaxHP 敌人最大 HP
+ * @param onEachHitVisual 每次 "-1" 触发的视觉反馈（如 BOSS 立绘闪光）
  */
 export function playPlayerWinSequence(
   scene: Phaser.Scene,
   result: RoundResult,
   enemyPortraitX: number,
   enemyPortraitY: number,
-  onComplete: () => void
+  onComplete: () => void,
+  enemyHealthBar?: HealthBar | null,
+  enemyHPBeforeDamage?: number,
+  enemyMaxHP?: number,
+  onEachHitVisual?: (index: number) => void
 ): void {
   const cx = WIDTH / 2;
   const cy = HEIGHT / 2 - 60;
@@ -132,27 +143,37 @@ export function playPlayerWinSequence(
             onComplete();
             return;
           }
-          showDamageBubble(
-            scene,
-            result.damageDealt,
-            enemyPortraitX,
-            enemyPortraitY,
-            () => {
-              showComboPopup(scene, result.comboApplied, () => {
+          showComboPopup(scene, result.comboApplied, () => {
+            showDamageBubble(
+              scene,
+              result.damageDealt,
+              enemyPortraitX,
+              enemyPortraitY,
+              () => {
                 playDamageNumberEffect(
                   scene,
                   enemyPortraitX,
                   enemyPortraitY - 30,
                   {
-                    value: result.damageDealt,
-                    count: 1,
+                    value: 1,
+                    count: result.damageDealt,
                     screenShake: true,
+                    onEachHit:
+                      enemyHealthBar && enemyHPBeforeDamage != null && enemyMaxHP != null
+                        ? (index) => {
+                            enemyHealthBar.setHP(
+                              enemyHPBeforeDamage - (index + 1),
+                              enemyMaxHP!
+                            );
+                          }
+                        : undefined,
+                    onEachHitVisual,
                   },
                   onComplete
                 );
-              });
-            }
-          );
+              }
+            );
+          });
         };
 
         if (
@@ -218,13 +239,19 @@ function showComboPopup(
 
 /**
  * 播放敌人获胜的动画序列（YOU LOSE / BUST + 伤害 + -1 特效）
+ * @param playerHealthBar 玩家血量条（用于实时扣血）
+ * @param playerHPBeforeDamage 伤害前玩家 HP
+ * @param playerMaxHP 玩家最大 HP
  */
 export function playEnemyWinSequence(
   scene: Phaser.Scene,
   result: RoundResult,
   playerPortraitX: number,
   playerPortraitY: number,
-  onComplete: () => void
+  onComplete: () => void,
+  playerHealthBar?: HealthBar | null,
+  playerHPBeforeDamage?: number,
+  playerMaxHP?: number
 ): void {
   const message = getRoundResultMessage(result);
   const cx = WIDTH / 2;
@@ -236,27 +263,37 @@ export function playEnemyWinSequence(
         onComplete();
         return;
       }
-      showDamageBubble(
-        scene,
-        result.damageDealt,
-        playerPortraitX,
-        playerPortraitY,
-        () => {
-          showComboPopup(scene, result.comboApplied, () => {
+      showComboPopup(scene, result.comboApplied, () => {
+        showDamageBubble(
+          scene,
+          result.damageDealt,
+          playerPortraitX,
+          playerPortraitY,
+          () => {
             playDamageNumberEffect(
               scene,
               playerPortraitX,
               playerPortraitY - 30,
               {
-                value: result.damageDealt,
-                count: 1,
+                value: 1,
+                count: result.damageDealt,
                 screenShake: true,
+                slashIntensity: 'exaggerated',
+                onEachHit:
+                  playerHealthBar && playerHPBeforeDamage != null && playerMaxHP != null
+                    ? (index) => {
+                        playerHealthBar.setHP(
+                          playerHPBeforeDamage - (index + 1),
+                          playerMaxHP!
+                        );
+                      }
+                    : undefined,
               },
               onComplete
             );
-          });
-        }
-      );
+          }
+        );
+      });
     };
 
     if (
